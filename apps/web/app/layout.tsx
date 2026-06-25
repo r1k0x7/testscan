@@ -31,6 +31,12 @@ export default function RootLayout({
               <a href="/whales" className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1">
                 <span>🐋</span> Whales
               </a>
+              <a href="/vaults" className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1">
+                <span>🏦</span> Vaults
+              </a>
+              <a href="/bundles" className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1">
+                <span>📦</span> Bundles
+              </a>
             </div>
           </div>
         </nav>
@@ -38,4 +44,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+                }
