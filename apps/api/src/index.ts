@@ -7,6 +7,7 @@ import { blockRoutes } from './routes/blocks.js';
 import { txRoutes } from './routes/transactions.js';
 import { addressRoutes } from './routes/addresses.js';
 import { searchRoutes } from './routes/search.js';
+import { whaleRoutes } from './routes/whales.js';
 import { wsRoutes } from './routes/websocket.js';
 
 const prisma = new PrismaClient({
@@ -19,7 +20,6 @@ const app = Fastify({
   logger: true,
 });
 
-// Register plugins
 await app.register(cors, {
   origin: true,
   credentials: true,
@@ -27,23 +27,21 @@ await app.register(cors, {
 
 await app.register(websocket);
 
-// Decorate with DB instances
 app.decorate('prisma', prisma);
 app.decorate('redis', redis);
 
-// Health check
 app.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
-// Routes
+// Register all routes
 await app.register(blockRoutes, { prefix: '/api/blocks' });
 await app.register(txRoutes, { prefix: '/api/transactions' });
 await app.register(addressRoutes, { prefix: '/api/addresses' });
 await app.register(searchRoutes, { prefix: '/api/search' });
+await app.register(whaleRoutes, { prefix: '/api/whales' });
 await app.register(wsRoutes, { prefix: '/ws' });
 
-// Start
 const PORT = parseInt(process.env.PORT || '3001');
 
 try {
@@ -54,7 +52,6 @@ try {
   process.exit(1);
 }
 
-// Graceful shutdown
 process.on('SIGTERM', async () => {
   await app.close();
   await prisma.$disconnect();
