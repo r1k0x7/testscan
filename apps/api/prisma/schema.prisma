@@ -95,3 +95,36 @@ model WhaleActivity {
   @@index([timestamp])
   @@map("whale_activities")
 }
+
+// ==========================================
+// PHASE 3: USER SYSTEM
+// ==========================================
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  walletAddress String?   @unique @map("wallet_address") @db.VarChar(42)
+  email         String?   @db.VarChar(255)
+  nickname      String?   @db.VarChar(50)
+  preferences   Json?     @db.JsonB
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  bundles       Bundle[]
+  priceAlerts   PriceAlert[]
+  exports       DataExport[]
+
+  @@map("users")
+}
+
+// ==========================================
+// PHASE 3: BUNDLES
+// ==========================================
+
+model Bundle {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  addresses   String[] @db.VarChar(42)
+  color       String?  @db.VarChar(7) // hex color
+  isPublic    Boolean  @default(false) @map("is_public")
