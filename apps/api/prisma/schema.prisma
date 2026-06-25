@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  id           BigInt   @id @default(autoincrement())
+  blockNumber  BigInt   @unique @map("block_number")
+  blockHash    String   @unique @map("block_hash") @db.VarChar(66)
+  parentHash   String?  @map("parent_hash") @db.VarChar(66)
+  timestamp    DateTime @db.Timestamptz()
+  txCount      Int      @default(0) @map("tx_count")
+  gasUsed      Decimal? @map("gas_used") @db.Decimal(78, 0)
+  gasLimit     Decimal? @map("gas_limit") @db.Decimal(78, 0)
+  validator    String?  @db.VarChar(42)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  transactions Transaction[]
+
+  @@index([blockNumber])
+  @@index([timestamp])
+  @@map("blocks")
+}
+
+model Transaction {
+  id          BigInt   @id @default(autoincrement())
+  txHash      String   @unique @map("tx_hash") @db.VarChar(66)
+  blockNumber BigInt   @map("block_number")
+  fromAddress String   @map("from_address") @db.VarChar(42)
+  toAddress   String?  @map("to_address") @db.VarChar(42)
+  value       Decimal  @default(0) @db.Decimal(78, 0)
+  gasPrice    Decimal? @map("gas_price") @db.Decimal(78, 0)
+  gasUsed     Decimal? @map("gas_used") @db.Decimal(78, 0)
+  status      String   @default("success") @db.VarChar(20)
+  txType      String?  @map("tx_type") @db.VarChar(50)
+  inputData   String?  @map("input_data") @db.Text
+  timestamp   DateTime @db.Timestamptz()
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  block       Block    @relation(fields: [blockNumber], references: [blockNumber])
+
+  @@index([txHash])
+  @@index([fromAddress])
+  @@index([toAddress])
+  @@index([blockNumber])
+  @@index([timestamp])
+  @@index([txType])
+  @@map("transactions")
+}
+
+model Address {
+  id           BigInt    @id @default(autoincrement())
+  address      String    @unique @db.VarChar(42)
+  addressType  String    @default("wallet") @map("address_type") @db.VarChar(20)
+  alias        String?   @db.VarChar(100)
+  isWhale      Boolean   @default(false) @map("is_whale")
+  firstSeen    DateTime? @map("first_seen") @db.Timestamptz()
+  lastSeen     DateTime? @map("last_seen") @db.Timestamptz()
+  totalTxCount BigInt    @default(0) @map("total_tx_count")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([address])
+  @@index([isWhale])
+  @@map("addresses")
+}
+
+model Token {
+  id            BigInt   @id @default(autoincrement())
+  tokenAddress  String   @unique @map("token_address") @db.VarChar(42)
+  name          String?  @db.VarChar(100)
+  symbol        String?  @db.VarChar(20)
+  decimals      Int      @default(18)
+  totalSupply   Decimal? @map("total_supply") @db.Decimal(78, 0)
+  tokenType     String?  @map("token_type") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@map("tokens")
+}
+
+model WhaleActivity {
+  id            BigInt   @id @default(autoincrement())
+  walletAddress String   @map("wallet_address") @db.VarChar(42)
+  activityType  String   @map("activity_type") @db.VarChar(50)
+  asset         String?  @db.VarChar(20)
+  amountUsd     Decimal? @map("amount_usd") @db.Decimal(78, 2)
+  txHash        String?  @map("tx_hash") @db.VarChar(66)
+  timestamp     DateTime @db.Timestamptz()
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([walletAddress])
+  @@index([timestamp])
+  @@map("whale_activities")
+}
